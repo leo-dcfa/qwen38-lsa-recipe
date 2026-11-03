@@ -59,3 +59,14 @@ RUN : "${LSA_COMMIT:?pass --build-arg LSA_COMMIT from pins.env}" \
  && test "$(git rev-parse HEAD)" = "$LSA_COMMIT" \
  && rm -rf .git \
  && UV_EXCLUDE_NEWER="$EXCLUDE_NEWER" uv pip install --no-cache --no-deps /src/lsa
+
+ARG MAP_URL
+ARG MAP_FILE
+ARG MAP_SHA256
+
+# The D-LSA map, in the image at /maps. A wrong file would load and silently
+# change which keys every query reads, so a checksum mismatch fails the build.
+RUN : "${MAP_SHA256:?pass --build-arg MAP_SHA256 from pins.env}" \
+ && mkdir -p /maps \
+ && curl -fsSL --retry 3 -o "/maps/$MAP_FILE" "$MAP_URL" \
+ && echo "$MAP_SHA256  /maps/$MAP_FILE" | sha256sum -c -
