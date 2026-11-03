@@ -44,3 +44,18 @@ RUN : "${PYTHON_VERSION:?pass --build-arg PYTHON_VERSION from pins.env}" \
  && UV_EXCLUDE_NEWER="$EXCLUDE_NEWER" SGLANG_BUILD_RUST_EXTS=none \
     MAX_JOBS=4 CMAKE_BUILD_PARALLEL_LEVEL=4 \
     uv pip install --no-cache /src/sglang/python
+
+ARG LSA_REPO
+ARG LSA_COMMIT
+
+# The LSA plugin. SGLang finds it through its entry point. --no-deps as in the
+# authors README: its runtime dependencies are already here at the same pins,
+# and nothing from its optional harness is wanted in a serving image.
+RUN : "${LSA_COMMIT:?pass --build-arg LSA_COMMIT from pins.env}" \
+ && git init -q /src/lsa \
+ && cd /src/lsa \
+ && git fetch -q --depth 1 "$LSA_REPO" "$LSA_COMMIT" \
+ && git checkout -q FETCH_HEAD \
+ && test "$(git rev-parse HEAD)" = "$LSA_COMMIT" \
+ && rm -rf .git \
+ && UV_EXCLUDE_NEWER="$EXCLUDE_NEWER" uv pip install --no-cache --no-deps /src/lsa
