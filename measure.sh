@@ -3,6 +3,7 @@
 # answers, check that it is the server it claims to be, run the bench, stop it.
 #   ./measure.sh baseline bench 131072 262144 524288
 #   ./measure.sh lsa bench 131072 262144 524288
+#   ./measure.sh baseline needles 32768 131072
 # It refuses to start while another container runs here, because two models can run a GB10
 # out of memory and hang it, and it kills the server if free memory falls below 6 GB.
 # The log is kept in ~/qwen38-lsa-logs, because stopping the server deletes its container.
@@ -19,7 +20,7 @@ PATH="$HOME/.local/bin:$PATH"
 cache="${HF_HOME:-$HOME/.cache/huggingface}"
 image="qwen38-lsa:sglang-${SGLANG_COMMIT:0:7}-lsa-${LSA_COMMIT:0:7}"
 commit="$(git rev-parse --short HEAD)"
-git diff --quiet HEAD -- "$recipe" bench.py pins.env \
+git diff --quiet HEAD -- "$recipe" bench.py needles.py pins.env \
   || { echo "measure.sh: commit first, so each result names what ran" >&2; exit 1; }
 
 if [ -n "$(docker ps -q)" ]; then
@@ -98,6 +99,16 @@ case "$task" in
       --user "$(id -u):$(id -g)" -e HOME=/tmp -e HF_HUB_OFFLINE=1 \
       -v "$cache:/cache/huggingface:ro" -v "$PWD:/recipe:ro" -v "$PWD/results:/results" \
       --entrypoint python3 "$image" -I /recipe/bench.py \
+        --label "$which" --recipe-commit "$commit" \
+        --snapshot "/cache/huggingface/hub/models--${MODEL//\//--}/snapshots/$MODEL_REVISION" \
+        --text "/cache/huggingface/hub/datasets--${SHAREGPT_REPO//\//--}/snapshots/$SHAREGPT_REVISION/$SHAREGPT_FILE" \
+        --contexts "$@"
+    ;;
+  needles)
+    docker run --rm --network host \
+      --user "$(id -u):$(id -g)" -e HOME=/tmp -e HF_HUB_OFFLINE=1 \
+      -v "$cache:/cache/huggingface:ro" -v "$PWD:/recipe:ro" -v "$PWD/results:/results" \
+      --entrypoint python3 "$image" -I /recipe/needles.py \
         --label "$which" --recipe-commit "$commit" \
         --snapshot "/cache/huggingface/hub/models--${MODEL//\//--}/snapshots/$MODEL_REVISION" \
         --text "/cache/huggingface/hub/datasets--${SHAREGPT_REPO//\//--}/snapshots/$SHAREGPT_REVISION/$SHAREGPT_FILE" \
