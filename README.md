@@ -34,3 +34,25 @@ One GB10 reaches about 512K, so the question this repo answers is: **is there a 
 6. Arm LSA (one commit), measure again, and check that accuracy holds.
 
 On GPUs other than Hopper, the plugin reads the selected keys through SGLang's Triton decode kernel, and its own kernels default to Triton, so FlashAttention-3 is not needed (`flash_reads` and `triton_sparse_read` in `src/lsa/sglang/models/qwen3_5/backend.py`).
+
+## Results so far
+
+The experiment stopped on 2026-11-04 after these runs, so the question above is only partly answered.
+Both servers ran the recipes in this repo at commit f6cd164, on one GB10. Raw lines are in results/.
+
+Speed at a 131,072-token prompt, one request at a time, 64 tokens out, two runs each:
+
+| | Full attention | D-LSA | Gain |
+|---|---:|---:|---:|
+| Time to first token | 238 s | 131 s | 1.8x |
+| Prefill | 550 tok/s | 1,000 tok/s | 1.8x |
+| Decode | 3.64 tok/s | 4.43 tok/s | 1.2x |
+
+The server log carried both `lsa-lsa: armed` and `lsa-lsa: indexing` under D-LSA and neither under full attention, so these runs show the plugin and the Triton read path working on sm121.
+
+**Not measured:**
+
+- **Accuracy under D-LSA.** `needles.py` ran on full attention only: 12 of 12 correct (10 at 32K, 2 at 128K). It never ran on D-LSA, so these numbers do not show that D-LSA answers as well as full attention.
+- **256K and 512K.** Neither was run. The D-LSA server reported room for 541,042 tokens, but a 512K prompt has not been tried.
+
+`needles.py` is a small check written for this recipe, not RULER, so its scores cannot be read against the paper.
