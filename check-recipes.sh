@@ -15,5 +15,9 @@ for recipe in qwen38-baseline.yaml qwen38-lsa.yaml; do
 done
 if [ -f qwen38-lsa.yaml ]; then
   need qwen38-lsa.yaml "/maps/$MAP_FILE" MAP_FILE
+  # Comments, the description and the override line may differ. Nothing else may.
+  a="$(grep -vE "^#|description:|override-args" qwen38-baseline.yaml)"
+  b="$(grep -vE "^#|description:|override-args" qwen38-lsa.yaml)"
+  [ "$a" = "$b" ] || { echo "check-recipes.sh: the recipes differ beyond the lsa block" >&2; fail=1; }
 fi
 exit "$fail"
