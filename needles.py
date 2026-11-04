@@ -36,9 +36,12 @@ for row in json.load(open(args.text)):
     for turn in row["conversations"]:
         texts.append(turn["value"])
         chars += len(turn["value"])
-    if chars > (longest + 8192) * args.rows * 2:
+    # About 4 characters a token, so this is about twice the longest context.
+    if chars > longest * 8:
         break
 ids = tokenizer("\n\n".join(texts), add_special_tokens=False)["input_ids"]
+if len(ids) < longest:
+    raise SystemExit(f"needles.py: the text has {len(ids)} tokens, {longest} asked for")
 
 for context in args.contexts:
     for row in range(args.rows):
