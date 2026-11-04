@@ -1,0 +1,72 @@
+# Qwen3.8-27B on one GB10, full attention: the baseline D-LSA is measured against.
+# The plugin is installed in the image but not armed, because no "lsa" block is passed,
+# so the checkpoint runs as released, under the YaRN rotation the map was distilled with.
+#   sparkrun run ./qwen38-baseline.yaml --hosts localhost --no-follow
+# --no-follow returns when the server starts, not when it is ready:
+# poll http://127.0.0.1:8000/v1/models for that.
+# Four values are copies of pins.env: the revision, the image tag, the rotation and,
+# in qwen38-lsa.yaml, the map.
+
+recipe_version: "2"
+model: Qwen/Qwen3.8-27B
+# sparkrun downloads this revision; the command passes it on to SGLang.
+model_revision: &revision 1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0
+runtime: sglang
+solo_only: true
+container: qwen38-lsa:sglang-042d955-lsa-906be19
+
+metadata:
+  description: Qwen3.8-27B BF16 on one GB10, full attention, YaRN to 10M, the baseline for D-LSA
+  maintainer: leo
+  source: https://github.com/leo-dcfa/qwen38-lsa-recipe
+
+defaults:
+  revision: *revision
+  served_model_name: qwen3.8-27b
+  # This box only. The API has no key.
+  host: 127.0.0.1
+  port: 8000
+  # SGLang keeps (1 - this) of the memory free before loading as slack for activations, and
+  # gives what is left after the weights to the KV cache. 0.80 of about 120 GiB leaves about
+  # 24 GiB of slack and 40 GiB of KV, and 512K tokens at 64 KiB each need 32 GiB.
+  gpu_memory_utilization: 0.80
+  # 512K for the longest prompt, 4K for its answer.
+  max_model_len: 528384
+  # One request at a time, so one row of DeltaNet state. Left unset, SGLang would give
+  # those states nearly as much memory as the KV cache, and 512K would no longer fit.
+  max_mamba_cache_size: 4
+
+env:
+  # The checkpoint says 262,144 positions; SGLang refuses a longer context unless told.
+  SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN: "1"
+  # Compiled kernels go inside the mounted HF cache, so they survive restarts.
+  TRITON_CACHE_DIR: /cache/huggingface/qwen38-lsa/triton
+  FLASHINFER_WORKSPACE_BASE: /cache/huggingface/qwen38-lsa
+
+# Both recipes carry the same flags, so the comparison measures the read and nothing else:
+#   --page-size 1 and --disable-prefill-cuda-graph, which the plugin requires
+#   --attention-backend triton, because FlashAttention-3 has no kernel for sm121
+#   --disable-radix-cache, so every prompt is prefilled whole. LSA does not reuse prefixes
+#   here, and a baseline that did would be measuring the cache.
+command: |
+  python3 -m sglang.launch_server \
+    --model-path {model} \
+    --revision {revision} \
+    --served-model-name {served_model_name} \
+    --dtype bfloat16 \
+    --kv-cache-dtype bf16 \
+    --tp-size 1 \
+    --host {host} \
+    --port {port} \
+    --context-length {max_model_len} \
+    --mem-fraction-static {gpu_memory_utilization} \
+    --max-running-requests 1 \
+    --max-mamba-cache-size {max_mamba_cache_size} \
+    --chunked-prefill-size 32768 \
+    --page-size 1 \
+    --disable-radix-cache \
+    --attention-backend triton \
+    --disable-prefill-cuda-graph \
+    --cuda-graph-max-bs-decode 1 \
+    --reasoning-parser qwen3 \
+    --json-model-override-args '{"text_config":{"rope_parameters":{"mrope_interleaved":true,"mrope_section":[11,11,10],"rope_type":"yarn","rope_theta":10000000,"partial_rotary_factor":0.25,"factor":40.0,"original_max_position_embeddings":262144}}}'
