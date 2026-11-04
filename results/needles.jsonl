@@ -1,0 +1,12 @@
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 32768, "row": 0, "position": 10138, "expected": 6609658, "answer": "6609658", "correct": true, "prompt_tokens": 32839, "seconds": 31.2}
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 32768, "row": 1, "position": 17199, "expected": 4943285, "answer": "4943285", "correct": true, "prompt_tokens": 32840, "seconds": 31.3}
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 32768, "row": 2, "position": 28783, "expected": 8302348, "answer": "8302348", "correct": true, "prompt_tokens": 32841, "seconds": 31.5}
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 32768, "row": 3, "position": 12314, "expected": 3878981, "answer": "3878981", "correct": true, "prompt_tokens": 32839, "seconds": 31.5}
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 32768, "row": 4, "position": 23671, "expected": 2021756, "answer": "2021756", "correct": true, "prompt_tokens": 32841, "seconds": 31.1}
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 32768, "row": 5, "position": 1910, "expected": 3994189, "answer": "3994189", "correct": true, "prompt_tokens": 32840, "seconds": 31.1}
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 32768, "row": 6, "position": 10833, "expected": 9187945, "answer": "9187945", "correct": true, "prompt_tokens": 32841, "seconds": 30.9}
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 32768, "row": 7, "position": 21008, "expected": 2835375, "answer": "2835375", "correct": true, "prompt_tokens": 32839, "seconds": 31.0}
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 32768, "row": 8, "position": 25206, "expected": 8783698, "answer": "8783698", "correct": true, "prompt_tokens": 32841, "seconds": 31.0}
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 32768, "row": 9, "position": 8307, "expected": 1068204, "answer": "1068204", "correct": true, "prompt_tokens": 32838, "seconds": 31.0}
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 131072, "row": 0, "position": 28773, "expected": 9144604, "answer": "9144604", "correct": true, "prompt_tokens": 131143, "seconds": 241.2}
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 131072, "row": 1, "position": 115338, "expected": 1518293, "answer": "1518293", "correct": true, "prompt_tokens": 131142, "seconds": 242.4}

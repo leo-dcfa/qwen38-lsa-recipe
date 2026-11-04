@@ -1,0 +1,4 @@
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 131072, "repeat": 0, "prompt_tokens": 131072, "cached_tokens": 0, "output_tokens": 64, "ttft_s": 238.33, "prefill_tok_s": 549.9, "decode_tok_s": 3.64}
+{"label": "baseline", "recipe_commit": "f6cd164", "context": 131072, "repeat": 1, "prompt_tokens": 131072, "cached_tokens": 0, "output_tokens": 64, "ttft_s": 237.71, "prefill_tok_s": 551.4, "decode_tok_s": 3.64}
+{"label": "lsa", "recipe_commit": "f6cd164", "context": 131072, "repeat": 0, "prompt_tokens": 131072, "cached_tokens": 0, "output_tokens": 64, "ttft_s": 131.32, "prefill_tok_s": 998.1, "decode_tok_s": 4.43}
+{"label": "lsa", "recipe_commit": "f6cd164", "context": 131072, "repeat": 1, "prompt_tokens": 131072, "cached_tokens": 0, "output_tokens": 64, "ttft_s": 130.76, "prefill_tok_s": 1002.4, "decode_tok_s": 4.43}
